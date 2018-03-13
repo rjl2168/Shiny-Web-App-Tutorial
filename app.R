@@ -19,11 +19,17 @@ ui <- fluidPage(
    # Sidebar with a slider input for number of bins 
    sidebarLayout(
       sidebarPanel(
-         sliderInput("N",
+         sliderInput("SampleSize",
                      "Number of Random Variables:",
-                     min = 1,
-                     max = 1000,
+                     min = 20,
+                     max = 50,
                      value = 1),
+
+         sliderInput("NumSamples",
+                     "Number of Random Samples Drawn from Distribution",
+                     min = 1,
+                     max = 50,
+                     value = 30),
          
          selectInput(inputId = "distr",
                      label = "Distribution",
@@ -33,53 +39,33 @@ ui <- fluidPage(
 
       # Show a plot of the generated distribution
       mainPanel(
-         plotOutput("distPlot"),
-         plotOutput("qqnormPlot")
+         plotOutput("distPlot")
       )
    )
 )
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
-  #Define the number of samples in each distribution
-  N_samp <- 1000
-  
+
    output$distPlot <- renderPlot({
-     #Initialize the data frame to all zeros
-     total_dist <- as.data.frame(matrix(0,N_samp,1))
-     for (i in 1:input$N) {
-       new_dist <- switch(input$distr, 
-                          "Uniform" = runif(N_samp, min = 0, max = 10), 
-                          "Exponential" = rexp(N_samp, rate = 1),
-                          "Poisson" = rpois(N_samp, lambda = 1),
-                          "Chi-Squared" = rchisq(N_samp, df = 1),
-                          "Binomial" = rbinom(N_samp, size = 50, prob = 0.1),
-                          "Student-t" = rt(N_samp, df = 10))
-       total_dist <- total_dist + as.data.frame(new_dist)
+     Sample_size <- input$SampleSize
+     Num_samples <- input$NumSamples
+     for (i in 1:Num_samples) {
+       samples <- switch(input$distr, 
+                          "Uniform" = runif(Sample_size, min = 0, max = 10), 
+                          "Exponential" = rexp(Sample_size, rate = 1),
+                          "Poisson" = rpois(Sample_size, lambda = 1),
+                          "Chi-Squared" = rchisq(Sample_size, df = 1),
+                          "Binomial" = rbinom(Sample_size, size = 50, prob = 0.1),
+                          "Student-t" = rt(Sample_size, df = 10))
+       sample_mean[i] <- mean(samples)
      }
-     #Render the plot
-     ggplot(total_dist, aes(total_dist)) + geom_histogram(aes(y = ..density..)) + stat_bin(bins = 50) + geom_density()
+
+     sample_mean_df <- as.data.frame(sample_mean)
+     ggplot(sample_mean_df, aes(V1)) + geom_histogram(aes(y = ..density..), stat = "bin", bins = 50) + geom_density()
      
    })
    
-   output$qqnormPlot <- renderPlot({
-     #Initialize the data frame to all zeros
-     total_dist <- as.data.frame(matrix(0,N_samp,1))
-     for (i in 1:input$N) {
-       new_dist <- switch(input$distr, 
-                          "Uniform" = runif(N_samp, min = 0, max = 10), 
-                          "Exponential" = rexp(N_samp, rate = 1),
-                          "Poisson" = rpois(N_samp, lambda = 1),
-                          "Chi-Squared" = rchisq(N_samp, df = 1),
-                          "Binomial" = rbinom(N_samp, size = 50, prob = 0.1),
-                          "Student-t" = rt(N_samp, df = 10))
-       total_dist <- total_dist + as.data.frame(new_dist)
-     }
-     #Render the plot
-     qqnorm(total_dist$total_dist[,N_samp])
-     qqline()
-     
-   })
 }
 
 # Run the application 
