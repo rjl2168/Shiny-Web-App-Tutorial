@@ -11,6 +11,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Shiny Application Tutorial
 
+All of the code for this project can be found in the following GitHub location:
+`https://github.com/rjl2168/Shiny-Web-App-Tutorial/`
+
 In this tutorial we will go over the basic features and workings of what makes up a Shiny application.  If you haven't already done so, be sure to install the "shiny" package using `install.packages("shiny")`.  This tutoral also makes use of the `ggplot2` library as well.
 
 ```{r eval=FALSE}
@@ -130,7 +133,5 @@ shinyApp(ui = ui, server = server)
 ```
 
 The third and final component of any shiny application is the `shinyApp()` function which binds the `server` code to the `ui` code.
-
-GitHub Repository: [https://github.com/rjl2168/Shiny-Web-App-Tutorial/](https://github.com/rjl2168/Shiny-Web-App-Tutorial/)
 
 Try it out the app: [https://rjl2168.shinyapps.io/shiny-web-app-tutorial/](https://rjl2168.shinyapps.io/shiny-web-app-tutorial/)
