@@ -1,5 +1,5 @@
 ---
-title: "Shiny_App_Tutorial"
+title: "Shiny Application Tutorial"
 author: "Rich Lavery"
 date: "March 14, 2018"
 output: html_document
@@ -9,22 +9,126 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+## Shiny Application Tutorial
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+In this tutorial we will go over the basic features and workings of what makes up a Shiny application.  If you haven't already done so, be sure to install the "shiny" package using `install.packages("shiny")`.  This tutoral also makes use of the `ggplot2` library as well.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+```{r eval=FALSE}
+library(shiny)
+library(ggplot2)
 
-```{r cars}
-summary(cars)
+# Define UI for application that draws a histogram
+ui <- fluidPage(
+   
+   # Application title
+   titlePanel("Interactive Shiny Application Example"),
+   
+   sidebarLayout(
 ```
 
-## Including Plots
+We will start by loading the `shiny` library as well as any other libraries we will need for our application. 
+Next we will start the definition of the User Interface or `ui`.  We define the `ui` using the `fluidPage()` function which will render an HTML file to display the components of our application.  Within the `fluidPage()` we define a title for the app using `titlePanel()`.  We can then begin to layout the page using the `sidebarLayout()` function.
 
-You can also embed plots, for example:
+```{r eval=FALSE}
+      #The sidebarPanel shows the various inputs
+      sidebarPanel(
+         selectInput(inputId = "u",
+                     label = "Mean",
+                     choices = c("-10", "-5", "0", "5", "10"),
+                     selected = "0"),
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+         selectInput(inputId = "std",
+                    label = "Standard Deviation",
+                    choices = c("1", "3", "5"),
+                    selected = "1"),
+         
+         radioButtons(inputId = "NumSamp",
+                      label = "Number of Samples",
+                      choices = c("100", "500", "1000"),
+                      selected = "500"),
+
+         sliderInput(inputId = "NumBins",
+                     label = "Number of Bins in Histogram",
+                     min = 1,
+                     max = 50,
+                     value = 30),
+         
+         actionButton(inputId = "showStats",
+                      label = "Print Stats")),
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+In our example, the first element of the `sidebarLayout()` is the `sidebarPanel()` which will contain all of our user intputs.  Here we have a total of five different user inputs demonstrating four different types including (1) a selection box, (2) a list of radio buttons, (3) a slider input, and (4) an action button.  There are other inputs types as well.  You, as the developer, can add as many user inputs as necessary.  Each user input will have an `inputId` and a `label`.  The `inputId` is needed for referencing the object later in the server application code, whereas the `label` is simply a clearly understood text string the application user will see when running the app.  In addition to these first two attributes there are additional attributes that may be sepecific to that particular input function.
+
+In our example we are allowing the user to select one of five different mean values and one of three different standard deviations using the `selectInput()` function which is displayed as a list of choices in a pull-down selection box.
+
+Next, we give the user the option to select one of three different sample sizes for our normal distribution.  This is done with the `radioButtons()` function which is displayed as a list of three options with a radio button for each choice.
+
+Next, we give the user the ability to select the number of bins in our histogram plot using the `sliderInput()` function which is displayed as a slider than ranges from the `min` and `max` values defined.
+
+Finally, we provide the user with a button using the `actionButton()` function which will display the statistics for our normal distribution (mean and standard deviation) when the user pushes the button.
+
+```{r eval=FALSE}
+      # The mainPanel calls out placeholders
+      mainPanel(
+         plotOutput("distPlot"),
+         textOutput("meanValue"),
+         textOutput("stdValue")
+      )
+   )
+)
+```
+
+The next element of the `sidebarLayout()` is the `mainPanel()` which will generate place holders in the HTML page for all of the outputs we indent to render.  In this case we will need a space to plot the noraml sample distribution which is denoted by the `plotOutput("distPlot")` line.  We also have provisions for two text outputs to show the mean and standard deviation of the sample set.  This is called out with the `textOutput("meanValue")` and `textOutput("stdValue")` lines.  Similar to the `id` string on the input functions, the text string inside the output function argument will be used to link the rendered outputs that are generated in the server code below.
+
+```{r eval=FALSE}
+# Define server logic required to draw a histogram
+server <- function(input, output) {
+   #Create a reactive object `sample_data` which can be used to other render functions
+   sample_data <- reactive({
+     Sample_size <- as.numeric(input$NumSamp)
+     Avg <- as.numeric(input$u)
+     Std_dev <- as.numeric(input$std)
+     rnorm(n = Sample_size, mean = Avg, sd = Std_dev)
+   })
+```
+
+We now move onto the second part of the shiny application which is the server function code.  The server function works off the input and output elements that were defined in the user interface portion of the application code.  
+
+We first create a reactive object called `sample_data` using the `reactive()` function.  We pass into the function a block of R code contained in the `{}` brackets.  Notice we are pulling in values for the sample size, mean value, and standard deviation value from the user input functions defined in the `ui`.  We do this by calling `input$<id>` where the <`id`> is the `id` attribute of our input.  Notice there are no `""` surrounding the `id`.  We then use these three values to generate the random normal sample using `rnorm`.  This sample list then gets returned to our `sample_data()` object for future use in the app.
+
+One important note on "reactivity".  Whenever the user changes one or more of the three reactive inputs that go into calculating the `sample_data`, the server will re-run this whole block of code resulting in new `sample_data` values.
+
+```{r eval=FALSE}
+   #Create a renderPlot object to update the plot when either the `sample_data` changes or the `NumBins` changes
+   output$distPlot <- renderPlot({
+     Num_bins <- input$NumBins
+     samples_df <- as.data.frame(sample_data())
+     ggplot(samples_df, aes(x = samples_df$sample_data)) + geom_histogram(aes(y = ..density..), 
+                                                                          stat = "bin", bins = Num_bins) +  
+       geom_density() + coord_cartesian(xlim = c(-20, 20)) + xlab("Data Values")
+   })
+```
+
+The next part of our server code is to render a plot object using the `renderPlot()` function that will be linked to the plot area we defined in the `ui` code using `output$disp`.
+
+Notice that there are two reactive inputs that this plot relies on: (1) `input$NumBins` from the slider input and (2) `sample_data()` which is the reactive value we calculated above.  If either of those items change, the server will re-run the code in the `renderPlot()` function to regenerate the plot.
+
+```{r eval=FALSE}
+   #Create a reactive output that only updates upon observing an event, such as the user pressing a button
+   observeEvent(input$showStats, {
+     output$meanValue <- renderText(isolate({paste("Mean =", toString(mean(sample_data())), sep = " ")}))
+     output$stdValue <- renderText(isolate({paste("Standard Deviation =", toString(sd(sample_data())), sep = " ")}))
+   })
+}
+```
+
+The last element of our server code is a function called `observeEvent()`.  We use this function to trigger a block of code to run when a particular event occurs.  In this case, that event is the user pressing the action button we defined in the `ui`.  When the action button is pressed, we will run two `renderText()` functions and link them to the two text outputs `output$meanValue` and `output$stdValue`.  You'll also notice we are using an `isolate()` function to encapsulate the R code.  We do this becuase the code contains the reative element `sample_data()` and we do not want the code to run when `sample_data()` changes.  We only want the code to run when the user presses the action button.
+
+```{r eval=FALSE}
+# Bind the user interface definition with the server definition and run the application 
+shinyApp(ui = ui, server = server)
+```
+
+The third and final component of any shiny application is the `shinyApp()` function which binds the `server` code to the `ui` code.
+
+Try it out

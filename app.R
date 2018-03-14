@@ -1,11 +1,6 @@
-#
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
+#Shiny Web Application for Tutorial Purpose
+#author: Rich Lavery (rjl2168)
+#date: "March 14, 2018"
 
 library(shiny)
 library(ggplot2)
@@ -21,18 +16,18 @@ ui <- fluidPage(
       sidebarPanel(
          selectInput(inputId = "u",
                      label = "Mean",
-                     choices = c(-10, -5, 0, 5, 10),
-                     selected = 0),
+                     choices = c("-10", "-5", "0", "5", "10"),
+                     selected = "0"),
 
          selectInput(inputId = "std",
                     label = "Standard Deviation",
-                    choices = c(1, 3, 5),
-                    selected = 1),
+                    choices = c("1", "3", "5"),
+                    selected = "1"),
          
          radioButtons(inputId = "NumSamp",
                       label = "Number of Samples",
-                      choices = c(100, 500, 1000),
-                      selected = 500),
+                      choices = c("100", "500", "1000"),
+                      selected = "500"),
 
          sliderInput(inputId = "NumBins",
                      label = "Number of Bins in Histogram",
@@ -41,9 +36,7 @@ ui <- fluidPage(
                      value = 30),
          
          actionButton(inputId = "showStats",
-                      label = "Print Stats")
-         
-      ),
+                      label = "Print Stats")),
 
       # The mainPanel calls out placeholders
       mainPanel(
