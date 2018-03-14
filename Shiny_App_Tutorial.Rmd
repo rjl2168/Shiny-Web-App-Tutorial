@@ -131,4 +131,6 @@ shinyApp(ui = ui, server = server)
 
 The third and final component of any shiny application is the `shinyApp()` function which binds the `server` code to the `ui` code.
 
-Try it out
+GitHub Repository: [https://github.com/rjl2168/Shiny-Web-App-Tutorial/](https://github.com/rjl2168/Shiny-Web-App-Tutorial/)
+
+Try it out the app: [https://rjl2168.shinyapps.io/shiny-web-app-tutorial/](https://rjl2168.shinyapps.io/shiny-web-app-tutorial/)
