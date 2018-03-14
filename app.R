@@ -48,9 +48,8 @@ ui <- fluidPage(
       # Show a plot of the generated distribution
       mainPanel(
          plotOutput("distPlot"),
-         verbatimTextOutput("stat_summary")
-#         textOutput("MeanValue"),
-#         textOutput("stdValue")
+         textOutput("meanValue"),
+         textOutput("stdValue")
       )
    )
 )
@@ -68,18 +67,14 @@ server <- function(input, output) {
    output$distPlot <- renderPlot({
      Num_bins <- input$NumBins
      samples_df <- as.data.frame(sample_data())
-     ggplot(samples_df, aes(samples_df)) + geom_histogram(aes(y = ..density..), stat = "bin", bins = Num_bins) + geom_density()
+     ggplot(samples_df, aes(x = samples_df$sample_data)) + geom_histogram(aes(y = ..density..), stat = "bin", bins = Num_bins) + geom_density()
      
    })
 
-   output$stat_summary <- renderPrint({
-     summary(sample_data())
-   })   
-#   observeEvent(input$showStats, {
-#     output$meanValue <- renderText({toString(mean(samples))})
-#     output$stdValue <- renderText({toString(sd(samples))})
-#   })
-
+   observeEvent(input$showStats, {
+     output$meanValue <- renderText(isolate({paste("Mean =", toString(mean(sample_data())), sep = " ")}))
+     output$stdValue <- renderText(isolate({paste("Standard Deviation =", toString(sd(sample_data())), sep = " ")}))
+   })
 }
 
 # Run the application 
