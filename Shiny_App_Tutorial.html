@@ -11,7 +11,7 @@
 
 <meta name="author" content="Rich Lavery" />
 
-<meta name="date" content="2018-03-14" />
+<meta name="date" content="2018-03-15" />
 
 <title>Shiny Application Tutorial</title>
 
@@ -306,7 +306,7 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">Shiny Application Tutorial</h1>
 <h4 class="author"><em>Rich Lavery</em></h4>
-<h4 class="date"><em>March 14, 2018</em></h4>
+<h4 class="date"><em>March 15, 2018</em></h4>
 
 </div>
 
@@ -314,7 +314,9 @@ $(document).ready(function () {
 <section id="shiny-application-tutorial" class="level2">
 <h2>Shiny Application Tutorial</h2>
 <p>All of the code for this project can be found in the following GitHub location: <code>https://github.com/rjl2168/Shiny-Web-App-Tutorial/</code></p>
-<p>In this tutorial we will go over the basic features and workings of what makes up a Shiny application. If you haven’t already done so, be sure to install the “shiny” package using <code>install.packages(&quot;shiny&quot;)</code>. This tutoral also makes use of the <code>ggplot2</code> library as well.</p>
+<p>In this tutorial we will go over the basic features and workings of what makes up a Shiny application. If you haven’t already done so, be sure to install the “shiny” package using <code>install.packages(&quot;shiny&quot;)</code>. This tutorial also makes use of the <code>ggplot2</code> library as well.</p>
+<section id="ui-definition" class="level3">
+<h3>UI Definition</h3>
 <pre class="r"><code>library(shiny)
 library(ggplot2)
 
@@ -326,6 +328,8 @@ ui &lt;- fluidPage(
    
    sidebarLayout(</code></pre>
 <p>We will start by loading the <code>shiny</code> library as well as any other libraries we will need for our application. Next we will start the definition of the User Interface or <code>ui</code>. We define the <code>ui</code> using the <code>fluidPage()</code> function which will render an HTML file to display the components of our application. Within the <code>fluidPage()</code> we define a title for the app using <code>titlePanel()</code>. We can then begin to layout the page using the <code>sidebarLayout()</code> function.</p>
+<section id="inputs" class="level4">
+<h4>Inputs</h4>
 <pre class="r"><code>      #The sidebarPanel shows the various inputs
       sidebarPanel(
          selectInput(inputId = &quot;u&quot;,
@@ -351,11 +355,14 @@ ui &lt;- fluidPage(
          
          actionButton(inputId = &quot;showStats&quot;,
                       label = &quot;Print Stats&quot;)),</code></pre>
-<p>In our example, the first element of the <code>sidebarLayout()</code> is the <code>sidebarPanel()</code> which will contain all of our user intputs. Here we have a total of five different user inputs demonstrating four different types including (1) a selection box, (2) a list of radio buttons, (3) a slider input, and (4) an action button. There are other inputs types as well. You, as the developer, can add as many user inputs as necessary. Each user input will have an <code>inputId</code> and a <code>label</code>. The <code>inputId</code> is needed for referencing the object later in the server application code, whereas the <code>label</code> is simply a clearly understood text string the application user will see when running the app. In addition to these first two attributes there are additional attributes that may be sepecific to that particular input function.</p>
+<p>In our example, the first element of the <code>sidebarLayout()</code> is the <code>sidebarPanel()</code> which will contain all of our user inputs. Here we have a total of five user inputs demonstrating four different input types including (1) two selection boxs, (2) a list of radio buttons, (3) a slider input, and (4) an action button. There are other inputs types as well. You, as the developer, can add as many user inputs as necessary. Each user input will have an <code>inputId</code> and a <code>label</code>. The <code>inputId</code> is needed for referencing the object later in the server application code, whereas the <code>label</code> is simply a discriptive text string the application user will see when running the app. In addition to these first two attributes there are additional attributes that may be specific to that particular input function.</p>
 <p>In our example we are allowing the user to select one of five different mean values and one of three different standard deviations using the <code>selectInput()</code> function which is displayed as a list of choices in a pull-down selection box.</p>
-<p>Next, we give the user the option to select one of three different sample sizes for our normal distribution. This is done with the <code>radioButtons()</code> function which is displayed as a list of three options with a radio button for each choice.</p>
-<p>Next, we give the user the ability to select the number of bins in our histogram plot using the <code>sliderInput()</code> function which is displayed as a slider than ranges from the <code>min</code> and <code>max</code> values defined.</p>
-<p>Finally, we provide the user with a button using the <code>actionButton()</code> function which will display the statistics for our normal distribution (mean and standard deviation) when the user pushes the button.</p>
+<p>Next, we give the user the option to select one of three different sample sizes for our normal sample set. This is done with the <code>radioButtons()</code> function which is displayed as a list of three options with a radio button for each choice.</p>
+<p>Next, we give the user the ability to select the number of bins in our histogram plot using the <code>sliderInput()</code> function which is displayed as a slider than ranges between the <code>min</code> and <code>max</code> values defined.</p>
+<p>Finally, we provide the user with a button using the <code>actionButton()</code> function which will display the statistics for our normal sample (mean and standard deviation) when the user pushes the button.</p>
+</section>
+<section id="outputs" class="level4">
+<h4>Outputs</h4>
 <pre class="r"><code>      # The mainPanel calls out placeholders
       mainPanel(
          plotOutput(&quot;distPlot&quot;),
@@ -364,7 +371,11 @@ ui &lt;- fluidPage(
       )
    )
 )</code></pre>
-<p>The next element of the <code>sidebarLayout()</code> is the <code>mainPanel()</code> which will generate place holders in the HTML page for all of the outputs we indent to render. In this case we will need a space to plot the noraml sample distribution which is denoted by the <code>plotOutput(&quot;distPlot&quot;)</code> line. We also have provisions for two text outputs to show the mean and standard deviation of the sample set. This is called out with the <code>textOutput(&quot;meanValue&quot;)</code> and <code>textOutput(&quot;stdValue&quot;)</code> lines. Similar to the <code>id</code> string on the input functions, the text string inside the output function argument will be used to link the rendered outputs that are generated in the server code below.</p>
+<p>The next element of the <code>sidebarLayout()</code> is the <code>mainPanel()</code> which will generate place holders in the HTML page for all of the outputs we intend to render. In this case we will need a space to plot the normal sample distribution which is denoted by the <code>plotOutput(&quot;distPlot&quot;)</code> line. We also have provisions for two text outputs to show the mean and standard deviation of the sample set. This is called out with the <code>textOutput(&quot;meanValue&quot;)</code> and <code>textOutput(&quot;stdValue&quot;)</code> lines. Similar to the <code>id</code> string on the input functions, the text string inside the output function argument will be used to link the rendered outputs that are generated in the server code below.</p>
+</section>
+</section>
+<section id="server-definition" class="level3">
+<h3>Server Definition</h3>
 <pre class="r"><code># Define server logic required to draw a histogram
 server &lt;- function(input, output) {
    #Create a reactive object `sample_data` which can be used to other render functions
@@ -393,11 +404,17 @@ server &lt;- function(input, output) {
      output$stdValue &lt;- renderText(isolate({paste(&quot;Standard Deviation =&quot;, toString(sd(sample_data())), sep = &quot; &quot;)}))
    })
 }</code></pre>
-<p>The last element of our server code is a function called <code>observeEvent()</code>. We use this function to trigger a block of code to run when a particular event occurs. In this case, that event is the user pressing the action button we defined in the <code>ui</code>. When the action button is pressed, we will run two <code>renderText()</code> functions and link them to the two text outputs <code>output$meanValue</code> and <code>output$stdValue</code>. You’ll also notice we are using an <code>isolate()</code> function to encapsulate the R code. We do this becuase the code contains the reative element <code>sample_data()</code> and we do not want the code to run when <code>sample_data()</code> changes. We only want the code to run when the user presses the action button.</p>
+<p>The last element of our server code is a function called <code>observeEvent()</code>. We use this function to trigger a block of code to run when a particular event occurs. In this case, that event is the user pressing the action button we defined in the <code>ui</code>. When the action button is pressed, we will run two <code>renderText()</code> functions and link them to the two text outputs <code>output$meanValue</code> and <code>output$stdValue</code>. You’ll also notice we are using an <code>isolate()</code> function to encapsulate the R code. We do this because the code contains the reactive element <code>sample_data()</code> and we do not want the code to run when <code>sample_data()</code> changes. We only want the code to run when the user presses the action button.</p>
+</section>
+<section id="build-the-shiny-application" class="level3">
+<h3>Build the Shiny Application</h3>
 <pre class="r"><code># Bind the user interface definition with the server definition and run the application 
 shinyApp(ui = ui, server = server)</code></pre>
-<p>The third and final component of any shiny application is the <code>shinyApp()</code> function which binds the <code>server</code> code to the <code>ui</code> code.</p>
-<p>Try it out the app: <a href="https://rjl2168.shinyapps.io/shiny-web-app-tutorial/" class="uri">https://rjl2168.shinyapps.io/shiny-web-app-tutorial/</a></p>
+<p>The third and final component of any shiny application is the <code>shinyApp()</code> function which binds the <code>server</code> code to the <code>ui</code> code and builds the app.</p>
+</section>
+</section>
+<section id="try-out-the-app-httpsrjl2168.shinyapps.ioshiny-web-app-tutorial" class="level2">
+<h2>Try out the app: <a href="https://rjl2168.shinyapps.io/shiny-web-app-tutorial/" class="uri">https://rjl2168.shinyapps.io/shiny-web-app-tutorial/</a></h2>
 </section>
 
 

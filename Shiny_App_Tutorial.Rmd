@@ -1,7 +1,7 @@
 ---
 title: "Shiny Application Tutorial"
 author: "Rich Lavery"
-date: "March 14, 2018"
+date: "March 15, 2018"
 output: html_document
 ---
 
@@ -14,7 +14,9 @@ knitr::opts_chunk$set(echo = TRUE)
 All of the code for this project can be found in the following GitHub location:
 `https://github.com/rjl2168/Shiny-Web-App-Tutorial/`
 
-In this tutorial we will go over the basic features and workings of what makes up a Shiny application.  If you haven't already done so, be sure to install the "shiny" package using `install.packages("shiny")`.  This tutoral also makes use of the `ggplot2` library as well.
+In this tutorial we will go over the basic features and workings of what makes up a Shiny application.  If you haven't already done so, be sure to install the "shiny" package using `install.packages("shiny")`.  This tutorial also makes use of the `ggplot2` library as well.
+
+### UI Definition
 
 ```{r eval=FALSE}
 library(shiny)
@@ -31,6 +33,8 @@ ui <- fluidPage(
 
 We will start by loading the `shiny` library as well as any other libraries we will need for our application. 
 Next we will start the definition of the User Interface or `ui`.  We define the `ui` using the `fluidPage()` function which will render an HTML file to display the components of our application.  Within the `fluidPage()` we define a title for the app using `titlePanel()`.  We can then begin to layout the page using the `sidebarLayout()` function.
+
+#### Inputs
 
 ```{r eval=FALSE}
       #The sidebarPanel shows the various inputs
@@ -60,15 +64,17 @@ Next we will start the definition of the User Interface or `ui`.  We define the 
                       label = "Print Stats")),
 ```
 
-In our example, the first element of the `sidebarLayout()` is the `sidebarPanel()` which will contain all of our user intputs.  Here we have a total of five different user inputs demonstrating four different types including (1) a selection box, (2) a list of radio buttons, (3) a slider input, and (4) an action button.  There are other inputs types as well.  You, as the developer, can add as many user inputs as necessary.  Each user input will have an `inputId` and a `label`.  The `inputId` is needed for referencing the object later in the server application code, whereas the `label` is simply a clearly understood text string the application user will see when running the app.  In addition to these first two attributes there are additional attributes that may be sepecific to that particular input function.
+In our example, the first element of the `sidebarLayout()` is the `sidebarPanel()` which will contain all of our user inputs.  Here we have a total of five user inputs demonstrating four different input types including (1) two selection boxs, (2) a list of radio buttons, (3) a slider input, and (4) an action button.  There are other inputs types as well.  You, as the developer, can add as many user inputs as necessary.  Each user input will have an `inputId` and a `label`.  The `inputId` is needed for referencing the object later in the server application code, whereas the `label` is simply a discriptive text string the application user will see when running the app.  In addition to these first two attributes there are additional attributes that may be specific to that particular input function.
 
 In our example we are allowing the user to select one of five different mean values and one of three different standard deviations using the `selectInput()` function which is displayed as a list of choices in a pull-down selection box.
 
-Next, we give the user the option to select one of three different sample sizes for our normal distribution.  This is done with the `radioButtons()` function which is displayed as a list of three options with a radio button for each choice.
+Next, we give the user the option to select one of three different sample sizes for our normal sample set.  This is done with the `radioButtons()` function which is displayed as a list of three options with a radio button for each choice.
 
-Next, we give the user the ability to select the number of bins in our histogram plot using the `sliderInput()` function which is displayed as a slider than ranges from the `min` and `max` values defined.
+Next, we give the user the ability to select the number of bins in our histogram plot using the `sliderInput()` function which is displayed as a slider than ranges between the `min` and `max` values defined.
 
-Finally, we provide the user with a button using the `actionButton()` function which will display the statistics for our normal distribution (mean and standard deviation) when the user pushes the button.
+Finally, we provide the user with a button using the `actionButton()` function which will display the statistics for our normal sample (mean and standard deviation) when the user pushes the button.
+
+#### Outputs
 
 ```{r eval=FALSE}
       # The mainPanel calls out placeholders
@@ -81,7 +87,9 @@ Finally, we provide the user with a button using the `actionButton()` function w
 )
 ```
 
-The next element of the `sidebarLayout()` is the `mainPanel()` which will generate place holders in the HTML page for all of the outputs we indent to render.  In this case we will need a space to plot the noraml sample distribution which is denoted by the `plotOutput("distPlot")` line.  We also have provisions for two text outputs to show the mean and standard deviation of the sample set.  This is called out with the `textOutput("meanValue")` and `textOutput("stdValue")` lines.  Similar to the `id` string on the input functions, the text string inside the output function argument will be used to link the rendered outputs that are generated in the server code below.
+The next element of the `sidebarLayout()` is the `mainPanel()` which will generate place holders in the HTML page for all of the outputs we intend to render.  In this case we will need a space to plot the normal sample distribution which is denoted by the `plotOutput("distPlot")` line.  We also have provisions for two text outputs to show the mean and standard deviation of the sample set.  This is called out with the `textOutput("meanValue")` and `textOutput("stdValue")` lines.  Similar to the `id` string on the input functions, the text string inside the output function argument will be used to link the rendered outputs that are generated in the server code below.
+
+### Server Definition
 
 ```{r eval=FALSE}
 # Define server logic required to draw a histogram
@@ -125,13 +133,15 @@ Notice that there are two reactive inputs that this plot relies on: (1) `input$N
 }
 ```
 
-The last element of our server code is a function called `observeEvent()`.  We use this function to trigger a block of code to run when a particular event occurs.  In this case, that event is the user pressing the action button we defined in the `ui`.  When the action button is pressed, we will run two `renderText()` functions and link them to the two text outputs `output$meanValue` and `output$stdValue`.  You'll also notice we are using an `isolate()` function to encapsulate the R code.  We do this becuase the code contains the reative element `sample_data()` and we do not want the code to run when `sample_data()` changes.  We only want the code to run when the user presses the action button.
+The last element of our server code is a function called `observeEvent()`.  We use this function to trigger a block of code to run when a particular event occurs.  In this case, that event is the user pressing the action button we defined in the `ui`.  When the action button is pressed, we will run two `renderText()` functions and link them to the two text outputs `output$meanValue` and `output$stdValue`.  You'll also notice we are using an `isolate()` function to encapsulate the R code.  We do this because the code contains the reactive element `sample_data()` and we do not want the code to run when `sample_data()` changes.  We only want the code to run when the user presses the action button.
+
+### Build the Shiny Application
 
 ```{r eval=FALSE}
 # Bind the user interface definition with the server definition and run the application 
 shinyApp(ui = ui, server = server)
 ```
 
-The third and final component of any shiny application is the `shinyApp()` function which binds the `server` code to the `ui` code.
+The third and final component of any shiny application is the `shinyApp()` function which binds the `server` code to the `ui` code and builds the app.
 
-Try it out the app: [https://rjl2168.shinyapps.io/shiny-web-app-tutorial/](https://rjl2168.shinyapps.io/shiny-web-app-tutorial/)
+## Try out the app: [https://rjl2168.shinyapps.io/shiny-web-app-tutorial/](https://rjl2168.shinyapps.io/shiny-web-app-tutorial/)
